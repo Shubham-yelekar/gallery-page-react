@@ -1,5 +1,6 @@
 import "./App.css";
 import { motion } from "motion/react";
+import { Gallery } from "./components";
 function App() {
   return (
     <>
@@ -18,6 +19,7 @@ function App() {
       >
         Gallery
       </motion.h1>
+      <Gallery />
     </>
   );
 }
