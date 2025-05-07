@@ -1,7 +1,4 @@
-* {
-  padding: 0px;
-  margin: 0px;
-}
+@import "tailwindcss";
 
 body {
   font-family: "Geist", sans-serif;
