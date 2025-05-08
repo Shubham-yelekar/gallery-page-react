@@ -1,4 +1,4 @@
-export default data = [
+export const data = [
   {
     title: "Half-Life 2",
     thumb: "/album/half-life-2.jpg",

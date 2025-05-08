@@ -12,9 +12,9 @@ const ControlBar = () => {
           Name
         </button>
       </div>
-      <div className="relative group h-[40px] w-[40px] hover:w-auto p-2 flex items-center bg-neutral-100 border-1 border-neutral-300 rounded-4xl">
+      <div className="relative h-[40px]  p-2 flex items-center bg-neutral-100 border-1 border-neutral-300 rounded-4xl">
         <input
-          className="w-0 px-0 group-hover:w-auto group-hover:px-4 transition-all ease-in-out duration-400  focus:outline-none"
+          className="px-4 transition-all ease-in-out duration-400 focus:outline-none"
           type="text"
           placeholder="Search"
         />
