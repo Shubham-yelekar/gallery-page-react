@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createApi } from "unsplash-js";
 import { motion, AnimatePresence } from "motion/react";
+import Card from "./Card";
 
 const getColumns = (items, columnCount) => {
   const cols = Array.from({ length: columnCount }, () => []);
@@ -127,16 +128,6 @@ const Gallery = () => {
   );
 };
 
-const Card = ({ photo, onClick }) => {
-  const { user, urls } = photo;
-  return (
-    <motion.div onClick={onClick} className="relative group cursor-zoom-in">
-      <div className="absolute opacity-0 group-hover:opacity-100 flex items-end justify-start p-4 text-white hover:bg-linear-to-b from-neutral-900/20 to-neutral-900/50 w-full h-full transition-all duration-300">
-        {user.name}
-      </div>
-      <motion.img layoutId={photo.id} src={urls.regular} alt="" />
-    </motion.div>
-  );
-};
+
 
 export default Gallery;
