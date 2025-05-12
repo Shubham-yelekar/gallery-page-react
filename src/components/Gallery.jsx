@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {useContext, useEffect, useRef, useState } from "react";
 import { createApi } from "unsplash-js";
 import { motion, AnimatePresence } from "motion/react";
 import Card from "./Card";
-import { div } from "motion/react-client";
+import { useQuery } from "./QueryContext";
 
 const getColumns = (items, columnCount) => {
   const cols = Array.from({ length: columnCount }, () => []);
@@ -27,13 +27,16 @@ const Gallery = () => {
   const cardRef = useRef();
   const observerRef = useRef(null);
 
+  const { query } = useQuery()
+
   // Fetching
   const fetchImages =(page)=>{
     setLoading(true)
-    unsplash.photos
-      .list({
+    unsplash.search.getPhotos({
+        query: query.search || undefined,
+        color: query.color || undefined,
         page,
-        perPage: 2, // Fetch 10 images per page
+        perPage: 10, // Fetch 10 images per page
       })
       .then((result) => {
         const photos = result.response?.results || [];
@@ -66,13 +69,13 @@ const Gallery = () => {
   }, []);
 
   useEffect(()=>{
-    fetchImages(page)
-  }, [page])
+    fetchImages(page, query)
+  }, [page, query])
 
   useEffect(()=>{
     const observer = new IntersectionObserver((entries)=>{
       const [entry] = entries
-      console.log(entry);
+      // console.log(entry);
       if (entry.isIntersecting && !loading) {
         setPage((prevPage) => prevPage + 1); // Increment page when sentinel is visible
       }
@@ -91,6 +94,8 @@ const Gallery = () => {
   }, [loading])
 
   const columnsData = getColumns(images, columns);
+
+
 
   // Animation
   const containerVariants = {
@@ -114,7 +119,7 @@ const Gallery = () => {
   const handleCardClick = (img) => {
     setCurrentImage(img);
     setModelOpen(true);
-    console.log(img);
+    // console.log(img);
   };
 
   return (
