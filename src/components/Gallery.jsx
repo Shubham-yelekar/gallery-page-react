@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createApi } from "unsplash-js";
 import { motion, AnimatePresence } from "motion/react";
 import Card from "./Card";
+import { div } from "motion/react-client";
 
 const getColumns = (items, columnCount) => {
   const cols = Array.from({ length: columnCount }, () => []);
@@ -20,26 +21,38 @@ const Gallery = () => {
   const [columns, setColumns] = useState(4);
   const [isModelOpen, setModelOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
 
   const cardRef = useRef();
+  const observerRef = useRef(null);
 
   // Fetching
-  useEffect(() => {
+  const fetchImages =(page)=>{
+    setLoading(true)
     unsplash.photos
       .list({
-        page: 1,
-        perPage: 20,
+        page,
+        perPage: 2, // Fetch 10 images per page
       })
       .then((result) => {
-        // setImages(result.response.results);
         const photos = result.response?.results || [];
-        setImages(photos);
+        setImages((prev) => {
+          const uniquePhotos = [...prev, ...photos].filter(
+            (photo, index, self) => self.findIndex((p) => p.id === photo.id) === index
+          );
+          return uniquePhotos;
+        });
       })
       .catch((error) => {
-        console.log("something went wrong!");
-        console.log(error);
+        console.error("Error fetching photos:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Set loading to false after fetching
       });
+  }
 
+  useEffect(() => {
     const updateColumns = () => {
       const width = window.innerWidth;
       if (width < 640) setColumns(2);
@@ -51,6 +64,32 @@ const Gallery = () => {
     window.addEventListener("resize", updateColumns);
     return () => window.removeEventListener("resize", updateColumns);
   }, []);
+
+  useEffect(()=>{
+    fetchImages(page)
+  }, [page])
+
+  useEffect(()=>{
+    const observer = new IntersectionObserver((entries)=>{
+      const [entry] = entries
+      console.log(entry);
+      if (entry.isIntersecting && !loading) {
+        setPage((prevPage) => prevPage + 1); // Increment page when sentinel is visible
+      }
+      
+    }, {root:null, rootMargin: "0px", threshold: 0.5 } )
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current); // Observe the sentinel element
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current); // Cleanup observer
+      }
+    };
+  }, [loading])
+
   const columnsData = getColumns(images, columns);
 
   // Animation
@@ -80,7 +119,7 @@ const Gallery = () => {
 
   return (
     <>
-      {images.length === 0 ? (
+      {images.length === 0 && !loading ? (
         <div className="h-[60vh] flex items-center justify-center ">
           ...loading
         </div>
@@ -95,11 +134,11 @@ const Gallery = () => {
               key={columnId}
               className=" break-inside-avoid"
             >
-              {column.map((img) => (
+              {column.map((img, index) => (
                 <motion.li
                   variants={cardVariants}
                   className="list-none"
-                  key={img.id}
+                  key={`${img.id}-${index}`}
                 >
                   <Card photo={img} onClick={() => handleCardClick(img)} />
                 </motion.li>
@@ -108,6 +147,12 @@ const Gallery = () => {
           ))}
         </div>
       )}
+      {loading && (
+        <div  className="text-center py-4">
+          <span>Loading more images...</span>
+        </div>
+      )}
+      <div ref={observerRef} className="h-20"></div>
       <AnimatePresence>
         {isModelOpen && currentImage ? (
           <motion.div
